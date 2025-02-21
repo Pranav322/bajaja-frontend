@@ -14,8 +14,18 @@ export default function BFHLFrontend() {
     setErrorMessage(""); // Clear previous error message
     try {
       const dataToSend = {
-        data: [...numbers.split(",").map(num => num.trim()), ...alphabets.split(",").map(alpha => alpha.trim())]
+        data: [
+          ...numbers.split(",").map(num => num.trim()).filter(num => num), // Filter out empty values
+          ...alphabets.split(",").map(alpha => alpha.trim()).filter(alpha => alpha) // Filter out empty values
+        ]
       };
+      
+      // Ensure only non-empty values are sent
+      if (dataToSend.data.length === 0) {
+        setErrorMessage("Please enter at least one number or alphabet."); // Show error message
+        setIsLoading(false); // Re-enable button
+        return; // Exit the function
+      }
       
       const res = await fetch(apiUrl, {
         method: "POST",
