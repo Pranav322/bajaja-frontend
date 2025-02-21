@@ -5,9 +5,13 @@ export default function BFHLFrontend() {
   const [alphabets, setAlphabets] = useState("");
   const [response, setResponse] = useState(null);
   const [filter, setFilter] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); 
   const apiUrl = "https://bajaj-backend-shivraj-9762bbb2056d.herokuapp.com/bfhl";
 
   const handleSubmit = async () => {
+    setIsLoading(true); // Disable button
+    setErrorMessage(""); // Clear previous error message
     try {
       const dataToSend = {
         data: [...numbers.split(",").map(num => num.trim()), ...alphabets.split(",").map(alpha => alpha.trim())]
@@ -29,7 +33,9 @@ export default function BFHLFrontend() {
       
       setResponse(data);
     } catch (error) {
-      alert("API error");
+      setErrorMessage("API error: " + error.message); // Show error message
+    } finally {
+      setIsLoading(false); // Re-enable button
     }
   };
 
@@ -38,7 +44,10 @@ export default function BFHLFrontend() {
     const { numbers, alphabets, highest_alphabet } = response;
     let filteredData = {};
     if (filter.includes("Numbers")) filteredData.numbers = numbers;
-    if (filter.includes("Alphabets")) filteredData.alphabets = alphabets;
+    if (filter.includes("Alphabets")) {
+      // Flatten the alphabets array
+      filteredData.alphabets = alphabets.flat();
+    }
     if (filter.includes("Highest Alphabet")) filteredData.highest_alphabet = highest_alphabet;
     return filteredData;
   };
@@ -64,8 +73,12 @@ export default function BFHLFrontend() {
       <br />
       <button 
         onClick={handleSubmit} 
-        style={{ padding: "10px 20px", marginBottom: "10px", borderRadius: "5px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}
-      >Submit</button>
+        disabled={isLoading} // Disable button while loading
+        style={{ padding: "10px 20px", marginBottom: "10px", borderRadius: "5px", backgroundColor: "#007bff", color: "white", border: "none", cursor: isLoading ? "not-allowed" : "pointer" }}
+      >
+        {isLoading ? "Loading..." : "Submit"} 
+      </button>
+      {errorMessage && <div style={{ color: "red", marginTop: "10px" }}>{errorMessage}</div>}
       <br />
       <select 
         multiple 
